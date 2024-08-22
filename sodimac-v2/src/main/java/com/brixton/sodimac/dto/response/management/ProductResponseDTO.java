@@ -1,4 +1,4 @@
-package com.brixton.sodimac.dto.response;
+package com.brixton.sodimac.dto.response.management;
 
 import com.brixton.sodimac.dto.response.generic.AuditResponseDTO;
 import lombok.Getter;
@@ -13,7 +13,7 @@ public class ProductResponseDTO extends AuditResponseDTO {
     private String name;
     private String category;
     private int quantity;
-    private int minQuantity=50;
+    private int minQuantity;
     private double priceSupplier;
     private double priceSale;
     private String codeProduct;

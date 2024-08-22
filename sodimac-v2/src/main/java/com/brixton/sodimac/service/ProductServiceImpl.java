@@ -6,8 +6,8 @@ import com.brixton.sodimac.data.entity.product.Product;
 import com.brixton.sodimac.data.enums.RegistryStateType;
 import com.brixton.sodimac.data.repository.CategoryRepository;
 import com.brixton.sodimac.data.repository.ProductRepository;
-import com.brixton.sodimac.dto.request.CreateProductRequestDTO;
-import com.brixton.sodimac.dto.response.ProductResponseDTO;
+import com.brixton.sodimac.dto.request.management.CreateProductRequestDTO;
+import com.brixton.sodimac.dto.response.management.ProductResponseDTO;
 import com.brixton.sodimac.service.mapper.ProductMapper;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -35,16 +37,64 @@ public class ProductServiceImpl implements ProductService{
         newProduct.setRegistryState(RegistryStateType.ACTIVE);
         Category category = categoryRepository.findById(newProduct.getCategory().getId()).orElseThrow(()-> new GenericNotFoundException("Id de category no existente"));
         newProduct.getCategory().setName(category.getName());
-        newProduct.generateCodeProduct();
-        newProduct.setCodeProduct(newProduct.getCodeProduct());
-        newProduct.setMinQuantity(Product.getMinQuantity());
         productRepository.save(newProduct);
-        ProductResponseDTO productResponseDTO = ProductMapper.INSTANCE.productToCreateProductResponseDTO(newProduct);
+        ProductResponseDTO productResponseDTO = ProductMapper.INSTANCE.productToProductResponseDTO(newProduct);
         return productResponseDTO;
 
     }
+    @Override
+    public List<ProductResponseDTO> createWithList(List<CreateProductRequestDTO> inputProducts){
+        List<ProductResponseDTO> products = new ArrayList<>();
+        for (CreateProductRequestDTO createProductRequestDTO: inputProducts){
+            try {
+                products.add(createProduct(createProductRequestDTO));
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return products;
+    }
+    @Override
+    public ProductResponseDTO getProduct(long id){
+        Product product= productRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Producto con Id no existente"));
+        return ProductMapper.INSTANCE.productToProductResponseDTO(product);
+    }
+    @Override
+    public List<ProductResponseDTO> getListEmployee(){
+        List<ProductResponseDTO> activeProducts = new ArrayList<>();
+        List<Product> productsFound = productRepository.findByRegistryEstate(RegistryStateType.ACTIVE);
+        for (Product productActive:productsFound){
+            activeProducts.add(ProductMapper.INSTANCE.productToProductResponseDTO(productActive));
+        }
+        return activeProducts;
+    }
+    @Override
+    public ProductResponseDTO updateProduct(long id, CreateProductRequestDTO productToUpdate){
+        Product original = productRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Producto con ID  no existente"));
+        Product productTemp =ProductMapper.INSTANCE.createProductRequestDTOToProduct(productToUpdate);
+        original.setUpdatedBy(USER_APP);
+        original.setUpdatedAt(LocalDateTime.now());
+        original.setName(productTemp.getName());
+        Category category = categoryRepository.findById(productTemp.getCategory().getId()).orElseThrow(()-> new GenericNotFoundException("Id de category no existente"));
+        productTemp.getCategory().setName(category.getName());
+        original.setCategory(productTemp.getCategory());
+        original.setQuantity(productTemp.getQuantity());
+        original.setMinQuantity(productTemp.getMinQuantity());
+        original.setPriceSale(productTemp.getPriceSale());
+        original.setPriceSupplier(productTemp.getPriceSupplier());
+        original.setCodeProduct(productTemp.getCodeProduct());
+        productRepository.save(original);
+        return ProductMapper.INSTANCE.productToProductResponseDTO(original);
 
-    
+    }
+    @Override
+    public void deleteProduct(long id){
+        Product product = productRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Producto no registrado"));
+        product.setRegistryState(RegistryStateType.INACTIVE);
+        product.setUpdatedAt(LocalDateTime.now());
+        product.setUpdatedBy(USER_APP);
+        productRepository.save(product);
+    }
 
     /*
     private static final String USER_APP = "BRIXTON";

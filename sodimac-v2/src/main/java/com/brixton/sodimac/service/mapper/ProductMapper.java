@@ -1,8 +1,8 @@
 package com.brixton.sodimac.service.mapper;
 
 import com.brixton.sodimac.data.entity.product.Product;
-import com.brixton.sodimac.dto.request.CreateProductRequestDTO;
-import com.brixton.sodimac.dto.response.ProductResponseDTO;
+import com.brixton.sodimac.dto.request.management.CreateProductRequestDTO;
+import com.brixton.sodimac.dto.response.management.ProductResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -19,7 +19,7 @@ public interface ProductMapper {
     @Mapping(source = "createdBy", target = "creadoPor")
     @Mapping(source = "updatedAt", target = "actualizadoEn", dateFormat = "yyyy/MM/dd HH:mm:ss")
     @Mapping(source = "updatedBy", target = "actualizadoPor")
-    ProductResponseDTO productToCreateProductResponseDTO(Product product);
+    ProductResponseDTO productToProductResponseDTO(Product product);
 
 
 
