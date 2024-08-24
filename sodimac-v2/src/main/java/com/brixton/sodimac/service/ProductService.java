@@ -12,11 +12,13 @@ public interface ProductService {
 
     ProductResponseDTO getProduct(long id);
 
-    List<ProductResponseDTO> getListEmployee();
+    List<ProductResponseDTO> getListProducts();
 
     ProductResponseDTO updateProduct(long id, CreateProductRequestDTO productToUpdate);
 
     void deleteProduct(long id);
+
+    List<ProductResponseDTO> getProductsForCategory(byte idCategory);
 
 //    Object createProduct(ProductRequestDTO inputProduct);
 //    List<Object> createWithList(List<ProductRequestDTO> inputProducts);
