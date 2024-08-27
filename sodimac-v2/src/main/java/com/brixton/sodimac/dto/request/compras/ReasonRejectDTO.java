@@ -1,4 +1,4 @@
-package com.brixton.sodimac.dto.compras;
+package com.brixton.sodimac.dto.request.compras;
 
 import lombok.Getter;
 import lombok.Setter;

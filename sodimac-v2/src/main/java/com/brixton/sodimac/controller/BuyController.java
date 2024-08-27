@@ -1,17 +1,9 @@
 package com.brixton.sodimac.controller;
 
-import com.brixton.sodimac.dto.compras.BuyDTO;
-import com.brixton.sodimac.dto.compras.ReasonRejectDTO;
-import com.brixton.sodimac.dto.request.OrderBuyRequestDTO;
-import com.brixton.sodimac.service.BuyService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/v1/compras")
+@RequestMapping("/v1/management/compras")
 public class BuyController {
 
     /*

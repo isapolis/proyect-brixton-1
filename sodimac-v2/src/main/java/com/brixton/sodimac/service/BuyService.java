@@ -1,13 +1,5 @@
 package com.brixton.sodimac.service;
 
-import com.brixton.sodimac.dto.compras.BuyDTO;
-import com.brixton.sodimac.dto.compras.ReasonRejectDTO;
-import com.brixton.sodimac.dto.request.OrderBuyRequestDTO;
-import com.brixton.sodimac.model.compras.Buy;
-import com.brixton.sodimac.model.compras.OrderBuy;
-
-import java.util.List;
-
 public interface BuyService {
 //    Object createRequerimentForBuy(BuyDTO requerimentBuy);
 //    Object confirmRequerimentForBuy(long idBuy, BuyDTO requerimentBuy);

@@ -16,18 +16,18 @@ public class ProductToBuy {
     @ManyToOne
     @JoinColumn(name = "product_id", foreignKey = @ForeignKey(name = "FK_product_buy"))
     private Product product;
-    @Column(name = "nameproduct", length = 30)
-    private String name;
+    @Column(name = "requiredquantity")
+    private double requiredQuantity;
     @Column(name = "quantitystock")
     private double quantityStock;
     @Column(name = "quantityintransit")
     private double quantityInTransit;
-    @Column(name = "requiredquantity")
-    private double requiredQuantity;
     @Column(name = "expectedamount")
     private double expectedAmount;
     @ManyToOne
     @JoinColumn(name = "buy_id", foreignKey = @ForeignKey(name = "FK_buy"))
-    private RequestBuy buy;
+    private ReqBuy reqBuy;
+//    @Column(name = "nameproduct", length = 30)
+//    private String name;
 
 }

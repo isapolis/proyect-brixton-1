@@ -1,6 +1,6 @@
 package com.brixton.sodimac.dto.response;
 
-import com.brixton.sodimac.dto.compras.ProductToBuyDTO;
+import com.brixton.sodimac.dto.request.compras.ProductToBuyRequestDTO;
 import com.brixton.sodimac.dto.generic.AuditDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +14,6 @@ public class BuyTemporalResponseDTO extends AuditDTO {
     private String buyStatus;
     private String dateStatus;
     private String motivoStatus;
-    private List<ProductToBuyDTO> productToBuys;
+    private List<ProductToBuyRequestDTO> productToBuys;
 
 }

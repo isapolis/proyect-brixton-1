@@ -1,4 +1,4 @@
-package com.brixton.sodimac.dto.compras;
+package com.brixton.sodimac.dto.request.compras;
 
 import com.brixton.sodimac.dto.generic.AuditDTO;
 import lombok.Getter;

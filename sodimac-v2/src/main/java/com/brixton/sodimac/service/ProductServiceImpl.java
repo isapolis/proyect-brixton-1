@@ -71,7 +71,7 @@ public class ProductServiceImpl implements ProductService{
     }
     @Override
     public ProductResponseDTO updateProduct(long id, CreateProductRequestDTO productToUpdate){
-        Product original = productRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Producto con ID  no existente"));
+        Product original = productRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Producto con ID no existente"));
         Product productTemp =ProductMapper.INSTANCE.createProductRequestDTOToProduct(productToUpdate);
         original.setUpdatedBy(USER_APP);
         original.setUpdatedAt(LocalDateTime.now());
@@ -84,6 +84,9 @@ public class ProductServiceImpl implements ProductService{
         original.setPriceSale(productTemp.getPriceSale());
         original.setPriceSupplier(productTemp.getPriceSupplier());
         original.setCodeProduct(productTemp.getCodeProduct());
+        if(original.getQuantity() <= original.getMinQuantity()){
+            //productsForBuys.put(original.getId(), original);
+        }
         productRepository.save(original);
         return ProductMapper.INSTANCE.productToProductResponseDTO(original);
 
