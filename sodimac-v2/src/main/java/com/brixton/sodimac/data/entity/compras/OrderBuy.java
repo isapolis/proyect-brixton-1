@@ -27,6 +27,6 @@ public class OrderBuy extends Audit {
     private Employee employee;
     @ManyToOne
     @JoinColumn(name = "buy_id",foreignKey = @ForeignKey(name = "FK_buy_order"))
-    private ReqBuy reqBuy;
+    private RequestBuy requestBuy;
 
 }

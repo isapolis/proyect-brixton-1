@@ -23,10 +23,10 @@ public class ProductToBuy {
     @Column(name = "quantityintransit")
     private double quantityInTransit;
     @Column(name = "expectedamount")
-    private double expectedAmount;
+    private double expectedQuantity;
     @ManyToOne
     @JoinColumn(name = "buy_id", foreignKey = @ForeignKey(name = "FK_buy"))
-    private ReqBuy reqBuy;
+    private RequestBuy requestBuy;
 //    @Column(name = "nameproduct", length = 30)
 //    private String name;
 

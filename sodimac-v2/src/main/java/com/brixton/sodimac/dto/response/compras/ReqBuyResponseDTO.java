@@ -1,6 +1,7 @@
 package com.brixton.sodimac.dto.response.compras;
 
 import com.brixton.sodimac.dto.generic.AuditDTO;
+import com.brixton.sodimac.dto.response.generic.AuditResponseDTO;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -12,11 +13,11 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class ReqBuyResponseDTO extends AuditDTO {
-    private long employeeCreatorId;
+public class ReqBuyResponseDTO extends AuditResponseDTO {
+    private long employeeRequesterId;
     private String buyStatus;
-    private String motivoStatus;
-    private long buyEmpoyeeId;
+    private String reasonStatus;
+    private long employeeAssignedId;
     private List<ProductToBuyResponseDTO> productToBuys;
 
 }

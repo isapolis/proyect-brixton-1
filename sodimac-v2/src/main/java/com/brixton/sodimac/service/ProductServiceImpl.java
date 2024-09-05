@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -110,7 +109,10 @@ public class ProductServiceImpl implements ProductService{
         return products;
 
     }
-
+    @Override
+    public Product getProductFromData(long id){
+        return productRepository.findById(id).orElseThrow(()->new GenericNotFoundException("Producto no registrado"));
+    }
 
     /*
     @Override

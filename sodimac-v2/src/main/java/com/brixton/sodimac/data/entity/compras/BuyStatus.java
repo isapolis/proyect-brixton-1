@@ -14,7 +14,7 @@ public class BuyStatus extends Audit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private byte id;
 
-    @Column(name = "buystatus",length = 20)
-    private String buyStatus;
+    @Column(name = "name",length = 20)
+    private String name;
 
 }

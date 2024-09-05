@@ -1,6 +1,10 @@
 package com.brixton.sodimac.service;
 
+import com.brixton.sodimac.dto.request.compras.ReqBuyRequestDTO;
+import com.brixton.sodimac.dto.response.compras.ReqBuyResponseDTO;
+
 public interface BuyService {
+    ReqBuyResponseDTO createRequestBuy(ReqBuyRequestDTO reqBuyRequestDTO);
 //    Object createRequerimentForBuy(BuyDTO requerimentBuy);
 //    Object confirmRequerimentForBuy(long idBuy, BuyDTO requerimentBuy);
 //    Object checkStatusOfRequerimentForBuy(long idEmployee, String status);

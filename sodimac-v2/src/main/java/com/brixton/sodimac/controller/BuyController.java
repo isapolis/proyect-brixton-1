@@ -1,10 +1,24 @@
 package com.brixton.sodimac.controller;
 
+import com.brixton.sodimac.dto.request.compras.ReqBuyRequestDTO;
+import com.brixton.sodimac.dto.response.compras.ReqBuyResponseDTO;
+import com.brixton.sodimac.service.BuyService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/management/compras")
 public class BuyController {
+    @Autowired
+    private BuyService buyService;
+    @PostMapping("/")
+    public ResponseEntity<ReqBuyResponseDTO> createRequestBuy(@Valid @RequestBody ReqBuyRequestDTO reqBuyRequestDTO){
+        ReqBuyResponseDTO reqBuy = buyService.createRequestBuy(reqBuyRequestDTO);
+        return ResponseEntity.ok(reqBuy);
+    }
+
 
     /*
     @Autowired

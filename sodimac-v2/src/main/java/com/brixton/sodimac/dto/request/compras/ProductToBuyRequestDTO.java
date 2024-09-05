@@ -14,9 +14,4 @@ public class ProductToBuyRequestDTO {
     @NotNull(message = "Cantidad requerida no puede ser vacio")
     private double requiredQuantity;
 
-    private double quantityStock;
-    private double quantityInTransit;
-    private double expectedAmount;
-    private String reqBuyId;
-
 }

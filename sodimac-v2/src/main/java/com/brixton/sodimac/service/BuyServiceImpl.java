@@ -1,11 +1,82 @@
 package com.brixton.sodimac.service;
 
+import com.brixton.sodimac.controller.manageexception.GenericNotFoundException;
+import com.brixton.sodimac.data.entity.compras.BuyStatus;
+import com.brixton.sodimac.data.entity.compras.ProductToBuy;
+import com.brixton.sodimac.data.entity.compras.RequestBuy;
+import com.brixton.sodimac.data.entity.employee.Employee;
+import com.brixton.sodimac.data.entity.product.Product;
+import com.brixton.sodimac.data.enums.RegistryStateType;
+import com.brixton.sodimac.data.repository.*;
+import com.brixton.sodimac.dto.request.compras.ReqBuyRequestDTO;
+import com.brixton.sodimac.dto.response.compras.ReqBuyResponseDTO;
+import com.brixton.sodimac.service.mapper.RequestBuyMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
 public class BuyServiceImpl implements BuyService {
+    private static final String USER_APP = "BRIXTON";
+    @Autowired
+    private RequestBuyRepository requestBuyRepository;
+    @Autowired
+    private ProductToBuyRepository productToBuyRepository;
+    @Autowired
+    private BuyStatusRepository buyStatusRepository;
+    @Autowired
+    private AreaRepository areaRepository;
+    @Autowired
+    private EmployeeService employeeService;
+//    @Autowired
+//    private ProductRepository productRepository;
+    @Autowired// lo recomendable es trabajar con la implementeación de los metodos usados
+    private ProductService productService;
+
+    @Override
+    public ReqBuyResponseDTO createRequestBuy(ReqBuyRequestDTO reqBuyRequestDTO){
+        RequestBuy newRequestBuy = RequestBuyMapper.INSTANCE.reqBuyRequestDTOToRequestBuy(reqBuyRequestDTO);
+        newRequestBuy.setCreatedAt(LocalDateTime.now());
+        newRequestBuy.setCreatedBy(USER_APP);
+        newRequestBuy.setRegistryState(RegistryStateType.ACTIVE);
+        BuyStatus buyStatus = buyStatusRepository.findById(newRequestBuy.getBuyStatus().getId()).orElseThrow(()-> new GenericNotFoundException("Id de Estado de compra no encontrado"));
+        newRequestBuy.getBuyStatus().setName(buyStatus.getName());
+        Employee authorizedEmployee = employeeService.findEmployeeByArea(newRequestBuy.getEmployeeRequester().getId(), areaRepository.findByName("LOGISTIC"));
+        newRequestBuy.setEmployeeRequester(authorizedEmployee);
+
+        if (newRequestBuy.getBuyStatus().getName().equals("CONFIRMED")){
+            newRequestBuy.setReasonStatus("CONFIRMED");
+            newRequestBuy.setEmployeeAssigned(employeeService.findRandomEmployeeByArea("SHOPPING"));
+            requestBuyRepository.save(newRequestBuy);//en este momento se crea su id autogenerado
+            for (ProductToBuy productToBuy: newRequestBuy.getProductToBuys()){
+                Product product = productService.getProductFromData(productToBuy.getProduct().getId());
+                productToBuy.getProduct().setName(product.getName());
+                productToBuy.setRequestBuy(newRequestBuy);
+                productToBuy.setQuantityStock(product.getQuantity());
+                productToBuy.setQuantityInTransit(0);
+                productToBuy.setExpectedQuantity(productToBuy.getQuantityStock()+productToBuy.getQuantityInTransit()+productToBuy.getRequiredQuantity());
+                productToBuyRepository.save(productToBuy);
+
+            }
+        } else {
+            newRequestBuy.setReasonStatus(buyStatus.getName());
+        }
+        for (ProductToBuy productToBuy: newRequestBuy.getProductToBuys()){
+            Product product = productService.getProductFromData(productToBuy.getProduct().getId());
+            productToBuy.getProduct().setName(product.getName());
+            productToBuy.setRequestBuy(newRequestBuy);
+            productToBuy.setQuantityStock(product.getQuantity());
+            productToBuy.setQuantityInTransit(0);
+            productToBuy.setExpectedQuantity(productToBuy.getQuantityStock()+productToBuy.getQuantityInTransit()+productToBuy.getRequiredQuantity());
+        }
+        return RequestBuyMapper.INSTANCE.requestBuyToRequestBuyResponseDTO(newRequestBuy);
+    }
+
+
 /*
     @Autowired
     private ProductService productService;

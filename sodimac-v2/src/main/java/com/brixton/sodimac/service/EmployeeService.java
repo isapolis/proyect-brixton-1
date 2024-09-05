@@ -1,5 +1,7 @@
 package com.brixton.sodimac.service;
 
+import com.brixton.sodimac.data.entity.employee.Area;
+import com.brixton.sodimac.data.entity.employee.Employee;
 import com.brixton.sodimac.dto.request.management.CreateEmployeeRequestDTO;
 import com.brixton.sodimac.dto.request.management.UpdateEmployeeRequestDTO;
 import com.brixton.sodimac.dto.response.management.EmployeeResponseDTO;
@@ -18,6 +20,16 @@ public interface EmployeeService {
     EmployeeResponseDTO updateEmployee(long id, UpdateEmployeeRequestDTO employeeToUpdate);
 
     void deleteEmployee(long id);
+
+    Employee getEmployeeFromData(long id);
+
+    Employee findEmployeeByArea(Long id, Area area);
+
+    List<Employee> employeesByArea(Area area);
+
+    //Employee employeeAleatoryByBuy(Area area);
+
+    Employee findRandomEmployeeByArea(String nameArea);
 
 //    List<Object> createWithList(List<EmployeeDTO> inputEmployees);
 //    Object getEmployee(long id);

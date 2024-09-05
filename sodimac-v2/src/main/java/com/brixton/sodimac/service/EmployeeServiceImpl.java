@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -103,7 +104,30 @@ public class EmployeeServiceImpl implements EmployeeService{
         employeeRepository.save(employee);
 
     }
-
+    @Override
+    public Employee getEmployeeFromData(long id){
+        return employeeRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Empleado no registrado"));
+    }
+    @Override
+    public Employee findEmployeeByArea(Long id, Area area){
+        return employeeRepository.findByIdAndArea(id, area).orElseThrow(()-> new GenericNotFoundException("Empleado no se encuentra en el área adecuada"));
+    }
+    @Override
+    public List<Employee> employeesByArea(Area area){
+        return employeeRepository.findByArea(area).orElseThrow(()->new GenericNotFoundException("No existen empleados en el área"));
+    }
+//    @Override
+//    public Employee employeeAleatoryByBuy(Area area){
+//        List<Employee> employeesByArea = employeeRepository.findByArea(area).orElseThrow(()-> new GenericNotFoundException("No se cuenta con empleados en Compras"));
+//        Random random = new Random();
+//        int randomIndex = random.nextInt(employeesByArea.size());
+//        Employee employeeBuy = employeesByArea.get(randomIndex);
+//        return employeeBuy;
+//    }
+    @Override
+    public Employee findRandomEmployeeByArea(String nameArea){
+        return  employeeRepository.findRandomEmployeeByArea(nameArea);
+    }
 
     /*
 

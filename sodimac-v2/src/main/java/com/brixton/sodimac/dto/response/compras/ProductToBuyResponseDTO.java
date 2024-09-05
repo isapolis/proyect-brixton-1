@@ -8,11 +8,10 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ProductToBuyResponseDTO {
-    private long id;
-    private String name;
+    private String nameProduct;
+    private double requiredQuantity;
     private double quantityStock;
     private double quantityInTransit;
-    private double requiredQuantity;
-    private double expectedAmount;
+    private double expectedQuantity;
 
 }
