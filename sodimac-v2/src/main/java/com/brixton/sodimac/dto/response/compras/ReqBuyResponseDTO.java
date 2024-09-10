@@ -14,6 +14,7 @@ import java.util.List;
 @Setter
 @ToString
 public class ReqBuyResponseDTO extends AuditResponseDTO {
+    private long id;
     private long employeeRequesterId;
     private String buyStatus;
     private String reasonStatus;

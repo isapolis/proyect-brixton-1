@@ -116,6 +116,7 @@ public class EmployeeServiceImpl implements EmployeeService{
     public List<Employee> employeesByArea(Area area){
         return employeeRepository.findByArea(area).orElseThrow(()->new GenericNotFoundException("No existen empleados en el área"));
     }
+
 //    @Override
 //    public Employee employeeAleatoryByBuy(Area area){
 //        List<Employee> employeesByArea = employeeRepository.findByArea(area).orElseThrow(()-> new GenericNotFoundException("No se cuenta con empleados en Compras"));

@@ -1,14 +1,24 @@
 package com.brixton.sodimac.controller;
 
+import com.brixton.sodimac.dto.request.OrderBuyRequestDTO;
 import com.brixton.sodimac.dto.request.compras.ReqBuyRequestDTO;
+import com.brixton.sodimac.dto.response.OrderBuyResponseDTO;
 import com.brixton.sodimac.dto.response.compras.ReqBuyResponseDTO;
 import com.brixton.sodimac.service.BuyService;
 import jakarta.validation.Valid;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
+@ToString
+@Slf4j
 @RequestMapping("/v1/management/compras")
 public class BuyController {
     @Autowired
@@ -18,7 +28,25 @@ public class BuyController {
         ReqBuyResponseDTO reqBuy = buyService.createRequestBuy(reqBuyRequestDTO);
         return ResponseEntity.ok(reqBuy);
     }
-
+    @GetMapping("/{idEmployee}/{buyStatus}")
+    public ResponseEntity<List<ReqBuyResponseDTO>> checkStatusOfRequestBuys(@PathVariable long idEmployee ,@PathVariable String buyStatus){
+        return new ResponseEntity<>(buyService.checkStatusOfRequestBuys(idEmployee, buyStatus), HttpStatus.OK);
+    }
+    @GetMapping("/confirmed")
+    public ResponseEntity<List<ReqBuyResponseDTO>> getConfirmedBuys(){
+        return new ResponseEntity<>(buyService.getConfirmedBuys(),HttpStatus.OK);
+    }
+    @DeleteMapping("/reject/{id}")
+    public  ResponseEntity<?> rejectRequestBuy(@Valid @PathVariable long id, @RequestBody String reason){
+        buyService.rejectRequestBuy(id,reason);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    @PostMapping("/orderbuy/{idemployee}")
+    public ResponseEntity<OrderBuyResponseDTO> createOrderBuy(@Valid @PathVariable long idemployee, @RequestBody OrderBuyRequestDTO orderBuyRequestDTO){
+        log.info("Hola estoy por esta ne");
+        OrderBuyResponseDTO orderBuyResponseDTO = buyService.createOrderBuy(idemployee, orderBuyRequestDTO);
+        return  ResponseEntity.ok(orderBuyResponseDTO);
+    }
 
     /*
     @Autowired

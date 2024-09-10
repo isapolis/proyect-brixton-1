@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "orderbuy")
 @Getter
@@ -28,5 +30,8 @@ public class OrderBuy extends Audit {
     @ManyToOne
     @JoinColumn(name = "buy_id",foreignKey = @ForeignKey(name = "FK_buy_order"))
     private RequestBuy requestBuy;
+
+    @Column(name = "date_status")
+    private LocalDate dateStatus;
 
 }

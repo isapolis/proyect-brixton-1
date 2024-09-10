@@ -2,26 +2,37 @@ package com.brixton.sodimac.service;
 
 import com.brixton.sodimac.controller.manageexception.GenericNotFoundException;
 import com.brixton.sodimac.data.entity.compras.BuyStatus;
+import com.brixton.sodimac.data.entity.compras.OrderBuy;
 import com.brixton.sodimac.data.entity.compras.ProductToBuy;
 import com.brixton.sodimac.data.entity.compras.RequestBuy;
 import com.brixton.sodimac.data.entity.employee.Employee;
+import com.brixton.sodimac.data.entity.logistic.StatusLogistic;
 import com.brixton.sodimac.data.entity.product.Product;
 import com.brixton.sodimac.data.enums.RegistryStateType;
 import com.brixton.sodimac.data.repository.*;
+import com.brixton.sodimac.dto.request.OrderBuyRequestDTO;
 import com.brixton.sodimac.dto.request.compras.ReqBuyRequestDTO;
+import com.brixton.sodimac.dto.response.OrderBuyResponseDTO;
 import com.brixton.sodimac.dto.response.compras.ReqBuyResponseDTO;
+import com.brixton.sodimac.service.mapper.OrderBuyMapper;
 import com.brixton.sodimac.service.mapper.RequestBuyMapper;
+import com.brixton.sodimac.service.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.brixton.sodimac.service.utils.FuntionalBusinessInterfaces.auditCreation;
+import static com.brixton.sodimac.service.utils.FuntionalBusinessInterfaces.auditUpdate;
 
 @Service
 @Slf4j
 public class BuyServiceImpl implements BuyService {
-    private static final String USER_APP = "BRIXTON";
     @Autowired
     private RequestBuyRepository requestBuyRepository;
     @Autowired
@@ -32,25 +43,26 @@ public class BuyServiceImpl implements BuyService {
     private AreaRepository areaRepository;
     @Autowired
     private EmployeeService employeeService;
-//    @Autowired
-//    private ProductRepository productRepository;
+    @Autowired
+    private StatusLogisticRepository statusLogisticRepository;
+    @Autowired
+    private OrderBuyRepository orderBuyRepository;
+
     @Autowired// lo recomendable es trabajar con la implementeación de los metodos usados
     private ProductService productService;
 
     @Override
     public ReqBuyResponseDTO createRequestBuy(ReqBuyRequestDTO reqBuyRequestDTO){
         RequestBuy newRequestBuy = RequestBuyMapper.INSTANCE.reqBuyRequestDTOToRequestBuy(reqBuyRequestDTO);
-        newRequestBuy.setCreatedAt(LocalDateTime.now());
-        newRequestBuy.setCreatedBy(USER_APP);
-        newRequestBuy.setRegistryState(RegistryStateType.ACTIVE);
+        auditCreation.accept(newRequestBuy);
         BuyStatus buyStatus = buyStatusRepository.findById(newRequestBuy.getBuyStatus().getId()).orElseThrow(()-> new GenericNotFoundException("Id de Estado de compra no encontrado"));
         newRequestBuy.getBuyStatus().setName(buyStatus.getName());
-        Employee authorizedEmployee = employeeService.findEmployeeByArea(newRequestBuy.getEmployeeRequester().getId(), areaRepository.findByName("LOGISTIC"));
+        Employee authorizedEmployee = employeeService.findEmployeeByArea(newRequestBuy.getEmployeeRequester().getId(), areaRepository.findByName(Constants.EMPLOYEE_LOGISTIC));
         newRequestBuy.setEmployeeRequester(authorizedEmployee);
 
-        if (newRequestBuy.getBuyStatus().getName().equals("CONFIRMED")){
-            newRequestBuy.setReasonStatus("CONFIRMED");
-            newRequestBuy.setEmployeeAssigned(employeeService.findRandomEmployeeByArea("SHOPPING"));
+        if (newRequestBuy.getBuyStatus().getName().equals(Constants.BUY_STATUS_CONFIRMED)){
+            newRequestBuy.setReasonStatus(Constants.BUY_STATUS_CONFIRMED);
+            newRequestBuy.setEmployeeAssigned(employeeService.findRandomEmployeeByArea(Constants.EMPLOYEE_SHOPPING));
             requestBuyRepository.save(newRequestBuy);//en este momento se crea su id autogenerado
             for (ProductToBuy productToBuy: newRequestBuy.getProductToBuys()){
                 Product product = productService.getProductFromData(productToBuy.getProduct().getId());
@@ -60,7 +72,6 @@ public class BuyServiceImpl implements BuyService {
                 productToBuy.setQuantityInTransit(0);
                 productToBuy.setExpectedQuantity(productToBuy.getQuantityStock()+productToBuy.getQuantityInTransit()+productToBuy.getRequiredQuantity());
                 productToBuyRepository.save(productToBuy);
-
             }
         } else {
             newRequestBuy.setReasonStatus(buyStatus.getName());
@@ -75,6 +86,76 @@ public class BuyServiceImpl implements BuyService {
         }
         return RequestBuyMapper.INSTANCE.requestBuyToRequestBuyResponseDTO(newRequestBuy);
     }
+
+    @Override
+    public List<ReqBuyResponseDTO> checkStatusOfRequestBuys(long idEmployee, String status) {
+        List<ReqBuyResponseDTO> listRequestBuys = new ArrayList<>();
+        Employee employeeLogistic = employeeService.findEmployeeByArea(idEmployee, areaRepository.findByName(Constants.EMPLOYEE_LOGISTIC));
+        BuyStatus buyStatus = buyStatusRepository.findByName(status).orElseThrow(()-> new GenericNotFoundException("Estado no identificado"));
+        List<RequestBuy> requestBuys = requestBuyRepository.findByBuyStatus(buyStatus);
+        for (RequestBuy reqBuy: requestBuys){
+            ReqBuyResponseDTO reqBuyTemp= RequestBuyMapper.INSTANCE.requestBuyToRequestBuyResponseDTO(reqBuy);
+            listRequestBuys.add(reqBuyTemp);
+        }
+        return listRequestBuys;
+    }
+    @Override
+    public List<ReqBuyResponseDTO> getConfirmedBuys(){
+        List<ReqBuyResponseDTO> reqBuyConfirmeds =new ArrayList<>();
+        BuyStatus buyStatus = buyStatusRepository.findByName(Constants.BUY_STATUS_CONFIRMED).orElseThrow(()-> new GenericNotFoundException("Estado no identificado"));
+        List<RequestBuy> requestBuys = requestBuyRepository.findByBuyStatus(buyStatus);
+        for (RequestBuy reqBuyTemp: requestBuys){
+            ReqBuyResponseDTO reqBuyResponseDTO = RequestBuyMapper.INSTANCE.requestBuyToRequestBuyResponseDTO(reqBuyTemp);
+            reqBuyConfirmeds.add(reqBuyResponseDTO);
+        }
+        return reqBuyConfirmeds;
+    }
+    @Override
+    public void rejectRequestBuy(long id, String reason){
+        RequestBuy requestBuy = requestBuyRepository.findById(id).orElseThrow(()-> new GenericNotFoundException("Solicitud de compra no registrada"));
+        requestBuy.setRegistryState(RegistryStateType.INACTIVE);
+        auditUpdate.accept(requestBuy);
+        BuyStatus buyStatus = buyStatusRepository.findByName(Constants.BUY_STATUS_REJECTED).orElseThrow(()-> new GenericNotFoundException("Estado no identificado"));
+        requestBuy.setBuyStatus(buyStatus);
+        requestBuy.setReasonStatus(reason);
+        requestBuyRepository.save(requestBuy);
+    }
+    @Override
+    public OrderBuyResponseDTO createOrderBuy(long idEmployee, OrderBuyRequestDTO orderBuyRequestDTO){
+        Employee employeeShopping = employeeService.findEmployeeByArea(idEmployee, areaRepository.findByName(Constants.EMPLOYEE_SHOPPING));
+        OrderBuy orderBuy = OrderBuyMapper.INSTANCE.orderBuyRequestDTOToOrderBuy(orderBuyRequestDTO);
+        log.info("nueva linea " + orderBuy.getRequestBuy().getId());
+        RequestBuy requestBuy = requestBuyRepository.findById(orderBuy.getRequestBuy().getId()).orElseThrow(()->new GenericNotFoundException("Solicitud de compra no registrada"));
+        BuyStatus buyStatus = buyStatusRepository.findByName(Constants.BUY_STATUS_APPROVED).orElseThrow(()-> new GenericNotFoundException("Estado de solicitud no identificado"));
+        requestBuy.setBuyStatus(buyStatus);
+        //Generar la cantidad en transito para ProductToBuy o productos a comprar en la solicitud de compra.
+        Map<Long, Double> quantityInTransits = new HashMap<>();
+        for (ProductToBuy productToBuy:requestBuy.getProductToBuys()){
+            quantityInTransits.merge(productToBuy.getId(), productToBuy.getRequiredQuantity(), Double::sum);
+        }
+        requestBuy.setReasonStatus(Constants.BUY_STATUS_APPROVED);
+
+        auditUpdate.accept(requestBuy);
+        requestBuyRepository.save(requestBuy);
+
+        StatusLogistic statusRequested = statusLogisticRepository.findByGroupStatus(Constants.DESCRIPTION_STATUS_REQUESTED,Constants.GROUP_STATUS_ORDER).orElseThrow(()-> new GenericNotFoundException("Registro status_logistic no encontrado"));
+        orderBuy.setStatusOrder(statusRequested);
+        orderBuy.setDateStatus(LocalDate.now());
+        auditCreation.accept(orderBuy);
+        orderBuy.setEmployee(requestBuy.getEmployeeAssigned());
+        orderBuyRepository.save(orderBuy);
+
+
+
+
+
+        return OrderBuyMapper.INSTANCE.orderBuyToOrderBuyResponseDTO(orderBuy);
+
+
+    }
+
+//    public List<OrderBuyResponseDTO>
+
 
 
 /*

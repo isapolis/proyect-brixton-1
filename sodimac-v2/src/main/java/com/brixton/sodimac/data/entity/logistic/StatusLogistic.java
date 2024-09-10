@@ -15,7 +15,7 @@ public class StatusLogistic extends Audit {
     private int id;
     @Column(length = 20)
     private String description;
-    @Column(name = "statuslogistic",length = 20)
-    private String statusLogistic;
+    @Column(name = "group_status",length = 20)
+    private String groupStatus;
 
 }
