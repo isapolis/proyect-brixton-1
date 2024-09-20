@@ -1,14 +1,6 @@
 package com.brixton.sodimac.controller;
 
-import com.brixton.sodimac.dto.request.BillRequestDTO;
-import com.brixton.sodimac.dto.request.TicketRequestDTO;
-import com.brixton.sodimac.dto.sale.ProformaDTO;
-import com.brixton.sodimac.service.SaleService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
